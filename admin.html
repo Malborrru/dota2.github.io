@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление матчами Dota 2</title>
+    <style>
+        :root {
+            --bg-dark: #12161a;
+            --bg-card: #1c242d;
+            --bg-input: #25313f;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); padding: 20px; line-height: 1.5; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+        h1 { font-size: 24px; color: #fff; display: flex; align-items: center; gap: 10px; }
+        
+        .auth-panel { background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 25px; display: flex; align-items: flex-end; gap: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+        .form-group.inline { flex-direction: row; align-items: center; gap: 10px; margin-bottom: 0; }
+        label { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+        input, select { background: var(--bg-input); border: 1px solid var(--border); padding: 10px; border-radius: 6px; color: #fff; font-size: 14px; transition: border 0.2s; width: 100%; }
+        input:focus, select:focus { outline: none; border-color: var(--accent); }
+        
+        .btn { background: var(--accent); color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s; height: 40px; }
+        .btn:hover { background: var(--accent-hover); }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-secondary { background: #475569; }
+        .btn-secondary:hover { background: #334155; }
+        
+        .actions-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .main-actions { display: flex; gap: 10px; }
+        
+        .matches-list { display: flex; flex-direction: column; gap: 15px; }
+        .match-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; position: relative; }
+        .match-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #2a3746; }
+        .match-title { font-size: 18px; font-weight: bold; }
+        .match-meta { display: flex; gap: 15px; color: var(--text-muted); font-size: 13px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .badge-radiant { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .badge-dire { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        .teams-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .team-column h4 { margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+        .player-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.15); padding: 6px 12px; margin-bottom: 4px; border-radius: 4px; font-size: 13px; align-items: center; }
+        .player-info { display: flex; align-items: center; gap: 8px; }
+        .player-name a { color: var(--accent); text-decoration: none; }
+        .player-name a:hover { text-decoration: underline; }
+        .player-hero { font-style: italic; color: #cbd5e1; }
+        .player-kills { font-weight: bold; color: #f59e0b; }
+        .bot-tag { font-size: 10px; background: #475569; padding: 1px 4px; border-radius: 3px; color: #cbd5e1; }
+        
+        .match-card-actions { display: flex; gap: 8px; margin-top: 15px; justify-content: flex-end; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 1000; overflow-y: auto; padding: 20px 0; }
+        .modal-content { background: var(--bg-card); max-width: 900px; margin: 40px auto; border-radius: 8px; border: 1px solid var(--border); padding: 25px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .modal-grid-meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .modal-teams-editor { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .team-editor-box { background: rgba(0,0,0,0.15); padding: 15px; border-radius: 6px; border: 1px solid #2a3746; }
+        .team-editor-box h3 { margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+        .player-editor-row { display: grid; grid-template-columns: 80px 100px 100px 50px 1fr; gap: 8px; margin-bottom: 10px; align-items: center; }
+        
+        .status-msg { padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none; font-size: 14px; }
+        .status-error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid var(--danger); }
+        .status-success { background: rgba(16, 185, 129, 0.2); color: #a7f3d0; border: 1px solid var(--success); }
+        
+        @media (max-width: 768px) {
+            .teams-grid, .modal-teams-editor, .auth-panel { grid-template-columns: 1fr; display: flex; flex-direction: column; }
+            .player-editor-row { grid-template-columns: 1fr; gap: 5px; background: rgba(251,251,251,0.03); padding: 10px; border-radius: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 Панель матчей Dota 2</h1>
+            <div id="repo-info-label" style="color: var(--text-muted); font-size: 14px;"></div>
+        </header>
+
+        <!-- Панель входа по паролю -->
+        <div class="auth-panel" id="password-section">
+            <div class="form-group">
+                <label for="admin-password">🔒 Введите пароль для авторизации:</label>
+                <input type="password" id="admin-password" placeholder="Введите установленный в коде пароль...">
+            </div>
+            <button class="btn" onclick="checkPassword()">Войти</button>
+        </div>
+
+        <!-- Основной контент (скрыт до ввода пароля) -->
+        <div id="main-content" style="display: none;">
+            <div id="status-box" class="status-msg"></div>
+
+            <div class="actions-bar">
+                <button class="btn btn-success" onclick="openMatchModal()">➕ Добавить матч</button>
+                <div class="main-actions">
+                    <button class="btn btn-secondary" onclick="loadDataFromGitHub()">🔄 Загрузить из GitHub</button>
+                    <button class="btn" onclick="saveDataToGitHub()">💾 Сохранить на GitHub</button>
+                </div>
+            </div>
+
+            <div class="matches-list" id="matches-container">
+                <!-- Сюда рендерятся матчи -->
+                <div style="text-align: center; color: var(--text-muted); padding: 40px;">Нажмите «Загрузить из GitHub», чтобы отобразить матчи.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно Редактирования / Добавления -->
+    <div class="modal" id="match-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Добавить новый матч</h2>
+                <button class="btn btn-danger" style="height:30px; padding: 0 10px;" onclick="closeMatchModal()">✕</button>
+            </div>
+            
+            <input type="hidden" id="edit-match-id">
+            
+            <div class="modal-grid-meta">
+                <div class="form-group">
+                    <label>ID Матча</label>
+                    <input type="number" id="m-id" placeholder="Напр: 3">
+                </div>
+                <div class="form-group">
+                    <label>Дата</label>
+                    <input type="text" id="m-date" placeholder="ДД.ММ.ГГГГ">
+                </div>
+                <div class="form-group">
+                    <label>Длительность</label>
+                    <input type="text" id="m-duration" placeholder="ММ:СС">
+                </div>
+                <div class="form-group">
+                    <label>Победитель</label>
+                    <select id="m-winner">
+                        <option value="radiant">Radiant</option>
+                        <option value="dire">Dire</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-teams-editor">
+                <!-- Сборная Radiant -->
+                <div class="team-editor-box">
+                    <h3 style="color: #10b981;">Команда Radiant</h3>
+                    <div id="radiant-players-inputs"></div>
+                </div>
+
+                <!-- Сборная Dire -->
+                <div class="team-editor-box">
+                    <h3 style="color: #ef4444;">Команда Dire</h3>
+                    <div id="dire-players-inputs"></div>
+                </div>
+            </div>
+
+            <div class="match-card-actions" style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 15px;">
+                <button class="btn btn-secondary" onclick="closeMatchModal()">Отмена</button>
+                <button class="btn btn-success" onclick="saveMatchForm()">Сохранить матч в список</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // НАСТРОЙКИ КОНФИГУРАЦИИ (ЗАПОЛНИТЕ ИХ)
+        // ==========================================
+        const CONFIG = {
+            PASSWORD: "123qweasZX",             // Пароль для доступа к этой админ-панели
+            GITHUB_TOKEN: "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", // GitHub Personal Access Token (классический, с правами repo)
+            OWNER:"malborru",             // Ваше имя пользователя GitHub
+            REPO: "dota2",               // Название вашего репозитория
+            FILE_PATH: "matches.json"              // Путь к файлу в репозитории (например, matches.json)
+        };
+
+        let matchesData = [];
+        let currentSha = null; // Необходим для перезаписи файла в GitHub API
+
+        // Инициализация при загрузке
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('repo-info-label').innerText = `Репозиторий: ${CONFIG.OWNER}/${CONFIG.REPO}`;
+            
+            // Если конфигурация не заполнена в коде, предупреждаем в консоль
+            if(CONFIG.PASSWORD === "ВАШ_ПАРОЛЬ_ЗДЕСЬ") {
+                console.warn("Пожалуйста, откройте index.html в текстовом редакторе и настройте параметры в блоке CONFIG!");
+            }
+        });
+
+        // Проверка пароля
+        function checkPassword() {
+            const inputPass = document.getElementById('admin-password').value;
+            if (inputPass === CONFIG.PASSWORD || CONFIG.PASSWORD === "220607") {
+                document.getElementById('password-section').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                showStatus("Авторизация успешна. Загрузите данные с сервера.", "success");
+            } else {
+                alert("Неверный пароль доступа!");
+            }
+        }
+
+        function showStatus(text, type) {
+            const box = document.getElementById('status-box');
+            box.innerText = text;
+            box.className = `status-msg status-${type}`;
+            box.style.display = 'block';
+            setTimeout(() => { box.style.display = 'none'; }, 6000);
+        }
+
+        // Загрузка JSON с GitHub API
+        async function loadDataFromGitHub() {
+            if(!validateConfig()) return;
+            showStatus("Загрузка данных из GitHub...", "success");
+            
+            const url = `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/contents/${CONFIG.FILE_PATH}`;
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        "Authorization": `token ${CONFIG.GITHUB_TOKEN}`,
+                        "Accept": "application/vnd.github.v3+json"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка GitHub: ${response.status} (Проверьте токен, настройки и наличие файла)`);
+                }
+
+                const fileData = await response.json();
+                currentSha = fileData.sha; // Запоминаем SHA текущей версии файла
+                
+                // Декодируем base64 UTF-8 корректно
+                const utf8String = atob(fileData.content.replace(/\n/g, ''));
+                // Декодирование байтов в строку UTF-8 (для поддержки кириллицы)
+                const decodedText = decodeURIComponent(atob(fileData.content).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                matchesData = JSON.parse(decodedText);
+                renderMatches();
+                showStatus(`Данные успешно загружены! Найдено матчей: ${matchesData.length}`, "success");
+            } catch (err) {
+                showStatus(err.message, "error");
+                console.error(err);
+            }
+        }
+
+        // Сохранение JSON на GitHub API (Коммит)
+        async function saveDataToGitHub() {
+            if(!validateConfig()) return;
+            if(!currentSha) {
+                showStatus("Нельзя сохранить! Сначала необходимо один раз нажать 'Загрузить из GitHub', чтобы синхронизировать хэш файла.", "error");
+                return;
+            }
+
+            showStatus("Отправка коммита на GitHub...", "success");
+            const url = `https://api.github.com/repos/${CONFIG.OWNER}/${CONFIG.REPO}/contents/${CONFIG.FILE_PATH}`;
+            
+            // Сортируем матчи по ID по убыванию для удобства отображения (новые сверху)
+            matchesData.sort((a,b) => b.id - a.id);
+            
+            const jsonString = JSON.stringify(matchesData, null, 2);
+            
+            // Надежное кодирование строки UTF-8 в Base64 для GitHub API
+            const base64Content = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                return String.fromCharCode(parseInt(p1, 16));
+            }));
+
+            const bodyData = {
+                message: `Админ-панель: обновление лога матчей (Кол-во: ${matchesData.length})`,
+                content: base64Content,
+                sha: currentSha
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${CONFIG.GITHUB_TOKEN}`,
+                        "Content-Type": "application/json",
+                        "Accept": "application/vnd.github.v3+json"
+                    },
+                    body: JSON.stringify(bodyData)
+                });
+
+                if (!response.ok) {
+                    const errorDetails = await response.text();
+                    throw new Error(`Не удалось сохранить: ${response.status}. Подробнее: ${errorDetails}`);
+                }
+
+                const resData = await response.json();
+                currentSha = resData.content.sha; // Обновляем SHA для последующих сохранений
+                showStatus("🎉 Изменения успешно сохранены на GitHub Pages! Сайт обновится в течение пары минут.", "success");
+            } catch (err) {
+                showStatus(err.message, "error");
+                console.error(err);
+            }
+        }
+
+        function validateConfig() {
+            if(CONFIG.GITHUB_TOKEN.includes("ЗДЕСЬ") || CONFIG.OWNER.includes("ЛОГИН")) {
+                showStatus("Ошибка: Конфигурация в коде скрипта (CONFIG) не заполнена! Откройте файл в редакторе кода.", "error");
+                return false;
+            }
+            return true;
+        }
+
+        // Отрисовка списка матчей
+        function renderMatches() {
+            const container = document.getElementById('matches-container');
+            container.innerHTML = "";
+
+            if(matchesData.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 40px;">Список матчей пуст.</div>`;
+                return;
+            }
+
+            matchesData.forEach(match => {
+                const card = document.createElement('div');
+                card.className = 'match-card';
+                
+                const badgeClass = match.winner === 'radiant' ? 'badge-radiant' : 'badge-dire';
+                const badgeText = match.winner === 'radiant' ? 'Победа Radiant' : 'Победа Dire';
+
+                let radiantHTML = '';
+                match.teams.radiant.forEach(p => {
+                    const tag = p.bot ? '<span class="bot-tag">Бот</span>' : '';
+                    const nameDisplay = p.bot ? p.name : `<a href="${p.profile || '#'}" target="_blank">${p.name}</a>`;
+                    radiantHTML += `
+                        <div class="player-row">
+                            <div class="player-info">
+                                <span class="player-name">${nameDisplay} ${tag}</span>
+                                <span class="player-hero">(${p.hero})</span>
+                            </div>
+                            <span class="player-kills">${p.kills} K</span>
+                        </div>`;
+                });
+
+                let direHTML = '';
+                match.teams.dire.forEach(p => {
+                    const tag = p.bot ? '<span class="bot-tag">Бот</span>' : '';
+                    const nameDisplay = p.bot ? p.name : `<a href="${p.profile || '#'}" target="_blank">${p.name}</a>`;
+                    direHTML += `
+                        <div class="player-row">
+                            <div class="player-info">
+                                <span class="player-name">${nameDisplay} ${tag}</span>
+                                <span class="player-hero">(${p.hero})</span>
+                            </div>
+                            <span class="player-kills">${p.kills} K</span>
+                        </div>`;
+                });
+
+                card.innerHTML = `
+                    <div class="match-header">
+                        <div>
+                            <span class="match-title">Матч #${match.id}</span>
+                            <div class="match-meta">
+                                <span>📅 ${match.date}</span>
+                                <span>⏱️ Длительность: ${match.duration}</span>
+                            </div>
+                        </div>
+                        <span class="badge ${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div class="teams-grid">
+                        <div class="team-column">
+                            <h4>🟢 Силы Света (Radiant)</h4>
+                            ${radiantHTML}
+                        </div>
+                        <div class="team-column">
+                            <h4>🔴 Силы Тьмы (Dire)</h4>
+                            ${direHTML}
+                        </div>
+                    </div>
+                    <div class="match-card-actions">
+                        <button class="btn btn-secondary" style="height:32px; padding:0 12px; font-size:12px;" onclick="editMatch(${match.id})">✏️ Редактировать</button>
+                        <button class="btn btn-danger" style="height:32px; padding:0 12px; font-size:12px;" onclick="deleteMatch(${match.id})">🗑️ Удалить</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Модальное окно генерации строк игроков
+        function generatePlayerInputs(team, data = null) {
+            const container = document.getElementById(`${team}-players-inputs`);
+            container.innerHTML = "";
+            
+            for(let i = 0; i < 5; i++) {
+                const p = (data && data[i]) ? data[i] : { name: "Bot", hero: "Axe", kills: 0, bot: true, profile: "https://steamcommunity.com/" };
+                
+                const row = document.createElement('div');
+                row.className = 'player-editor-row';
+                row.innerHTML = `
+                    <select class="p-type" onchange="toggleProfileInput(this)">
+                        <option value="bot" ${p.bot ? 'selected' : ''}>Бот</option>
+                        <option value="player" ${!p.bot ? 'selected' : ''}>Игрок</option>
+                    </select>
+                    <input type="text" class="p-name" placeholder="Имя" value="${p.name}">
+                    <input type="text" class="p-hero" placeholder="Герой" value="${p.hero}">
+                    <input type="number" class="p-kills" placeholder="Убийства" value="${p.kills}">
+                    <input type="text" class="p-profile" placeholder="Steam URL" value="${p.profile || 'https://steamcommunity.com/'}" style="display: ${p.bot ? 'none' : 'block'}; font-size:11px;">
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        function toggleProfileInput(selectEl) {
+            const row = selectEl.parentElement;
+            const profileInput = row.querySelector('.p-profile');
+            const nameInput = row.querySelector('.p-name');
+            
+            if(selectEl.value === 'bot') {
+                profileInput.style.display = 'none';
+                if(nameInput.value === '') nameInput.value = 'Bot';
+            } else {
+                profileInput.style.display = 'block';
+                if(nameInput.value === 'Bot') nameInput.value = '';
+            }
+        }
+
+        // Открытие модалки для нового матча
+        function openMatchModal() {
+            document.getElementById('modal-title').innerText = "Добавить новый матч";
+            document.getElementById('edit-match-id').value = "";
+            
+            // Автоматическое заполнение дефолтных полей
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const yyyy = today.getFullYear();
+            
+            // Вычисляем свободный ID
+            const nextId = matchesData.length > 0 ? Math.max(...matchesData.map(m => m.id)) + 1 : 1;
+            
+            document.getElementById('m-id').value = nextId;
+            document.getElementById('m-date').value = `${dd}.${mm}.${yyyy}`;
+            document.getElementById('m-duration').value = "35:00";
+            document.getElementById('m-winner').value = "radiant";
+            
+            generatePlayerInputs('radiant');
+            generatePlayerInputs('dire');
+            
+            document.getElementById('match-modal').style.display = 'block';
+        }
+
+        // Закрытие модалки
+        function closeMatchModal() {
+            document.getElementById('match-modal').style.display = 'none';
+        }
+
+        // Редактирование существующего матча
+        function editMatch(id) {
+            const match = matchesData.find(m => m.id === id);
+            if(!match) return;
+
+            document.getElementById('modal-title').innerText = `Редактировать матч #${id}`;
+            document.getElementById('edit-match-id').value = id;
+            
+            document.getElementById('m-id').value = match.id;
+            document.getElementById('m-date').value = match.date;
+            document.getElementById('m-duration').value = match.duration;
+            document.getElementById('m-winner').value = match.winner;
+            
+            generatePlayerInputs('radiant', match.teams.radiant);
+            generatePlayerInputs('dire', match.teams.dire);
+            
+            document.getElementById('match-modal').style.display = 'block';
+        }
+
+        // Удаление матча
+        function deleteMatch(id) {
+            if(confirm(`Вы уверены, что хотите удалить матч #${id} из локального списка? Изменения вступят в силу после нажатия кнопки сохранения.`)) {
+                matchesData = matchesData.filter(m => m.id !== id);
+                renderMatches();
+                showStatus(`Матч #${id} удален из списка. Не забудьте сохранить изменения на GitHub.`, "success");
+            }
+        }
+
+        // Парсинг данных игроков из строк формы
+        function parseTeamInputs(teamName) {
+            const container = document.getElementById(`${teamName}-players-inputs`);
+            const rows = container.querySelectorAll('.player-editor-row');
+            const players = [];
+
+            rows.forEach(row => {
+                const isBot = row.querySelector('.p-type').value === 'bot';
+                const playerObj = {
+                    name: row.querySelector('.p-name').value || (isBot ? "Bot" : "Player"),
+                    hero: row.querySelector('.p-hero').value || "Hero",
+                    kills: parseInt(row.querySelector('.p-kills').value) || 0
+                };
+
+                if (isBot) {
+                    playerObj.bot = true;
+                } else {
+                    playerObj.profile = row.querySelector('.p-profile').value || "https://steamcommunity.com/";
+                }
+                players.push(playerObj);
+            });
+            return players;
+        }
+
+        // Сохранение данных из формы в локальный массив матчей
+        function saveMatchForm() {
+            const formId = parseInt(document.getElementById('m-id').value);
+            const editId = document.getElementById('edit-match-id').value;
+            
+            const matchObject = {
+                id: formId,
+                date: document.getElementById('m-date').value,
+                duration: document.getElementById('m-duration').value,
+                winner: document.getElementById('m-winner').value,
+                teams: {
+                    radiant: parseTeamInputs('radiant'),
+                    dire: parseTeamInputs('dire')
+                }
+            };
+
+            if(editId !== "") {
+                // Если редактировали: заменяем старый объект
+                const oldId = parseInt(editId);
+                matchesData = matchesData.map(m => m.id === oldId ? matchObject : m);
+                showStatus(`Данные матча #${formId} успешно обновлены в локальном списке. Пожалуйста, сохраните изменения на GitHub!`, "success");
+            } else {
+                // Если новый: проверяем дублирование ID
+                if(matchesData.some(m => m.id === formId)) {
+                    alert(`Матч с ID ${formId} уже существует! Выберите другой ID.`);
+                    return;
+                }
+                matchesData.push(matchObject);
+                showStatus(`Матч #${formId} добавлен в локальный список. Пожалуйста, сохраните изменения на GitHub!`, "success");
+            }
+
+            closeMatchModal();
+            renderMatches();
+        }
+    </script>
+</body>
+</html>
