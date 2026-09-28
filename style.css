@@ -1,0 +1,40 @@
+*{box-sizing:border-box}
+:root{
+  --bg:#0d0f12;--panel:#15181d;--panel2:#1b1f25;--line:#30353d;
+  --text:#eee;--muted:#969da7;--light:#5dbb72;--dark:#c45b5b;
+}
+body{
+  margin:0;background:radial-gradient(circle at top,#20242b 0,#0d0f12 45%);
+  color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100vh;
+}
+.top{max-width:1180px;margin:auto;padding:34px 20px 22px;display:flex;justify-content:space-between;gap:20px;align-items:end}
+.eyebrow{font-size:12px;letter-spacing:3px;color:#777f89}
+h1{margin:7px 0 0;font-size:36px}
+.stats{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.stat{background:#171a1f;border:1px solid var(--line);border-radius:10px;padding:10px 14px;text-align:center}
+.stat b{display:block;font-size:19px}.stat span{font-size:11px;color:var(--muted)}
+.matches{max-width:1180px;margin:auto;padding:0 20px 50px}
+.match{background:rgba(21,24,29,.96);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:16px 0;box-shadow:0 12px 35px #0005}
+.match-head{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;background:#191c21;border-bottom:1px solid var(--line)}
+.result{font-weight:800}.win{color:#69c47b}.loss{color:#d76b6b}
+.meta{color:var(--muted);font-size:13px}
+.teams{display:grid;grid-template-columns:1fr 1fr}
+.team{min-width:0}.team:first-child{border-right:1px solid var(--line)}
+.team-title{padding:15px 18px;font-weight:800;display:flex;justify-content:space-between}
+.light .team-title{background:linear-gradient(90deg,#17311f,#19201c);color:#7ad98c}
+.dark .team-title{background:linear-gradient(90deg,#321a1a,#20191b);color:#df7777}
+.player{display:grid;grid-template-columns:minmax(120px,1fr) minmax(110px,.8fr) 55px;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid #272b31}
+.player:hover{background:#20242a}
+.name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.name a{color:inherit;text-decoration:none}.name a:hover{text-decoration:underline}
+.bot{font-size:11px;color:#a8afb8;font-weight:normal;margin-left:5px}
+.hero{color:#b9bec6;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kills{text-align:right;font-weight:900;font-size:18px}
+.bottom{padding:15px 18px;border-top:1px solid var(--line);display:flex;justify-content:center;align-items:center;gap:16px;color:var(--muted);font-size:13px}
+.score{font-size:21px;font-weight:900;color:#eee}.dash{color:#555}
+@media(max-width:700px){
+  .top{align-items:flex-start;flex-direction:column}.stats{justify-content:flex-start}
+  h1{font-size:30px}.matches{padding:0 10px 30px}
+  .player{grid-template-columns:minmax(80px,1fr) minmax(75px,.8fr) 35px;padding:11px 10px;gap:7px}
+  .team-title{padding:12px 10px}.match-head{padding:12px}.hero{font-size:12px}.kills{font-size:16px}
+}

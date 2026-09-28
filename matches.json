@@ -1,0 +1,146 @@
+[
+  {
+    "id": 1,
+    "date": "28.09.2026",
+    "duration": "42:17",
+    "winner": "radiant",
+    "teams": {
+      "radiant": [
+        {
+          "name": "Тёма",
+          "hero": "Juggernaut",
+          "kills": 18,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Player123",
+          "hero": "Invoker",
+          "kills": 12,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Bot",
+          "hero": "Axe",
+          "kills": 4,
+          "bot": true
+        },
+        {
+          "name": "Иван",
+          "hero": "Sven",
+          "kills": 6,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Bot",
+          "hero": "Lion",
+          "kills": 0,
+          "bot": true
+        }
+      ],
+      "dire": [
+        {
+          "name": "CoolPlayer",
+          "hero": "Pudge",
+          "kills": 7,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Shadow",
+          "hero": "Shadow Fiend",
+          "kills": 11,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Bot",
+          "hero": "Drow Ranger",
+          "kills": 3,
+          "bot": true
+        },
+        {
+          "name": "Alex",
+          "hero": "Axe",
+          "kills": 5,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Bot",
+          "hero": "Crystal Maiden",
+          "kills": 6,
+          "bot": true
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "date": "27.09.2026",
+    "duration": "35:44",
+    "winner": "dire",
+    "teams": {
+      "radiant": [
+        {
+          "name": "Тёма",
+          "hero": "Phantom Assassin",
+          "kills": 10,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Bot",
+          "hero": "Dazzle",
+          "kills": 2,
+          "bot": true
+        },
+        {
+          "name": "PlayerX",
+          "hero": "Earthshaker",
+          "kills": 4,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Bot",
+          "hero": "Lina",
+          "kills": 8,
+          "bot": true
+        },
+        {
+          "name": "Bot",
+          "hero": "Tidehunter",
+          "kills": 1,
+          "bot": true
+        }
+      ],
+      "dire": [
+        {
+          "name": "EnemyOne",
+          "hero": "Sven",
+          "kills": 14,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Bot",
+          "hero": "Lion",
+          "kills": 5,
+          "bot": true
+        },
+        {
+          "name": "DarkPlayer",
+          "hero": "Sniper",
+          "kills": 9,
+          "profile": "https://steamcommunity.com/"
+        },
+        {
+          "name": "Bot",
+          "hero": "Juggernaut",
+          "kills": 3,
+          "bot": true
+        },
+        {
+          "name": "Bot",
+          "hero": "Witch Doctor",
+          "kills": 4,
+          "bot": true
+        }
+      ]
+    }
+  }
+]
