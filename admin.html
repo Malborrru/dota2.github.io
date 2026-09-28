@@ -180,8 +180,8 @@
         const CONFIG = {
             PASSWORD: "123qweasZX",             // Пароль для доступа к этой админ-панели
             GITHUB_TOKEN: "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", // GitHub Personal Access Token (классический, с правами repo)
-            OWNER:"malborru",             // Ваше имя пользователя GitHub
-            REPO: "dota2",               // Название вашего репозитория
+            OWNER:"Malborrru",             // Ваше имя пользователя GitHub
+            REPO: "dota2.github.io",               // Название вашего репозитория
             FILE_PATH: "matches.json"              // Путь к файлу в репозитории (например, matches.json)
         };
 
@@ -193,7 +193,7 @@
             document.getElementById('repo-info-label').innerText = `Репозиторий: ${CONFIG.OWNER}/${CONFIG.REPO}`;
             
             // Если конфигурация не заполнена в коде, предупреждаем в консоль
-            if(CONFIG.PASSWORD === "220607") {
+            if(CONFIG.PASSWORD === "123qweasZX") {
                 console.warn("Пожалуйста, откройте index.html в текстовом редакторе и настройте параметры в блоке CONFIG!");
             }
         });
@@ -201,7 +201,7 @@
         // Проверка пароля
         function checkPassword() {
             const inputPass = document.getElementById('admin-password').value;
-            if (inputPass === CONFIG.PASSWORD || CONFIG.PASSWORD === "220607") {
+            if (inputPass === CONFIG.PASSWORD || CONFIG.PASSWORD === "123qweasZX") {
                 document.getElementById('password-section').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 showStatus("Авторизация успешна. Загрузите данные с сервера.", "success");
